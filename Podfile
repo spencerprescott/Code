@@ -6,7 +6,7 @@ target 'Code' do
   use_frameworks!
 
   # Pods for Code
-  pod 'SnapKit'
+  pod 'SnapKit', '~> 5.0.0'
 
   target 'CodeTests' do
     inherit! :search_paths

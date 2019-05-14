@@ -9,12 +9,16 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    private let service = FlickrPhotoService()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        let min = Date().addingTimeInterval(-3*24*60*60)
+        let max = Date()
+        service.searchPhotos(dateRange: DateRange(min: min, max: max)) { result in
+            
+        }
     }
-
-
 }
 
