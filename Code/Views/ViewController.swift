@@ -22,7 +22,5 @@ class ViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setupBindings() {
-        
-    }
+    func setupBindings() {}
 }

@@ -49,6 +49,6 @@ final class PhotoViewModel: PhotoViewModelType, PhotoViewModelInput, PhotoViewMo
     }
     
     private func selectDailyPhoto(from photos: [Photo]) -> Single<Photo?> {
-        return .just(photos.first)
+        return .just(photos.randomElement())
     }
 }

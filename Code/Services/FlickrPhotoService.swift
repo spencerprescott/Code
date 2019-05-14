@@ -104,7 +104,7 @@ private final class FlickrUrlFactory {
         var url: String {
             switch self {
             case .search(let dateRange):
-                return "?method=flickr.photos.search&min_upload_date=\(dateRange.min.timeIntervalSince1970)&max_upload_date=\(dateRange.max.timeIntervalSince1970)&per_page=1"
+                return "?method=flickr.photos.search&min_upload_date=\(dateRange.min.timeIntervalSince1970)&max_upload_date=\(dateRange.max.timeIntervalSince1970)&per_page=20&safe_search=1"
             }
         }
     }

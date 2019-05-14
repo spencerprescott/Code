@@ -21,9 +21,15 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
     }()
     private lazy var titleLabel: UILabel = {
         let l = UILabel()
+        l.numberOfLines = 0
         l.font = UIFont.systemFont(ofSize: 20, weight: .medium)
-        l.textColor = .black
+        l.textColor = .white
         return l
+    }()
+    private lazy var contentContainerView: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        return v
     }()
     
     private var disposeBag = DisposeBag()
@@ -31,16 +37,23 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.backgroundColor = .white
+        contentContainerView.isHidden = true
         
         contentView.addSubview(imageView)
         imageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
         
-        contentView.addSubview(titleLabel)
+        contentView.addSubview(contentContainerView)
+        contentContainerView.snp.makeConstraints { make in
+            make.bottom.leading.trailing.equalToSuperview()
+        }
+        
+        contentContainerView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(20)
-            make.leading.trailing.equalToSuperview()
+            make.top.equalToSuperview().inset(20)
+            make.bottom.equalTo(contentContainerView.snp.bottomMargin).inset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
         }
     }
     
@@ -50,6 +63,7 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        contentContainerView.isHidden = true
         imageView.image = nil
         imageView.kf.cancelDownloadTask()
         disposeBag = DisposeBag()
@@ -61,7 +75,7 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
         photo
             .map { $0?.title }
             .asDriver(onErrorJustReturn: nil)
-            .drive(titleLabel.rx.text)
+            .drive(photoTitle)
             .disposed(by: disposeBag)
         
         photo
@@ -69,5 +83,12 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
             .asDriver(onErrorJustReturn: nil)
             .drive(imageView.rx.url)
             .disposed(by: disposeBag)
+    }
+    
+    private var photoTitle: Binder<String?> {
+        return Binder(self) { view, title in
+            view.titleLabel.text = title
+            view.contentContainerView.isHidden = title == nil
+        }
     }
 }

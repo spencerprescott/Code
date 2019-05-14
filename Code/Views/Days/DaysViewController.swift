@@ -15,6 +15,7 @@ final class DaysViewController: ViewController {
         let v = UICollectionView(frame: .zero, collectionViewLayout: .vertical)
         v.delegate = self
         v.isPagingEnabled = true
+        v.backgroundColor = .white
         v.register(PhotoCollectionViewCell.self, forCellWithReuseIdentifier: PhotoCellReuseIdentifier)
         return v
     }()
@@ -52,6 +53,9 @@ final class DaysViewController: ViewController {
             .asDriver(onErrorJustReturn: nil)
             .drive(navigationItem.rx.title)
             .disposed(by: disposeBag)
+        
+        // Fire off that we've started on page one
+        viewModel.input.currentIndex.onNext(0)
     }
 }
 

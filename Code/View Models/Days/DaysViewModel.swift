@@ -56,7 +56,7 @@ final class DaysViewModel: DaysViewModelType, DaysViewModelInput, DaysViewModelO
     
     var photos: Observable<[PhotoViewModel]> {
         let viewModels = _days
-            .map { PhotoViewModel(dateRange: .init(min: $0, max: $0)) }
+            .map { PhotoViewModel(dateRange: .init(min: $0.addingDays(-1), max: $0)) }
         return .just(viewModels)
     }
     
