@@ -11,7 +11,6 @@ import RxSwift
 
 protocol NetworkServicing: class {
     func executeRequest(url: URL) -> Single<Data>
-    func executeRequest(url: URL, resultHandler: @escaping (Result<Data, NetworkError>) -> Void)
 }
 
 final class NetworkService: NetworkServicing {
@@ -20,22 +19,7 @@ final class NetworkService: NetworkServicing {
     init() {
         self.session = URLSession(configuration: .default)
     }
-    
-    func executeRequest(url: URL, resultHandler: @escaping (Result<Data, NetworkError>) -> Void) {
-        let request = URLRequest(url: url)
-        let task = session.dataTask(with: request) { data, response, error in
-            if let error = error {
-                resultHandler(.failure(NetworkError(errorDescription: error.localizedDescription)))
-            } else if let data = data {
-                resultHandler(.success(data))
-            } else {
-                resultHandler(.failure(NetworkError(errorDescription: "Unknown Error")))
-            }
-        }
         
-        task.resume()
-    }
-    
     func executeRequest(url: URL) -> Single<Data> {
         return Single.create(subscribe: { [weak self] single -> Disposable in
             guard let self = self else {

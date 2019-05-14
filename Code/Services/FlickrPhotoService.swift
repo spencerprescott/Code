@@ -36,34 +36,6 @@ final class FlickrPhotoService: FlickrPhotoServicing {
             .flatMap(parseData)
     }
     
-    func searchPhotos(dateRange: DateRange, resultHandler: @escaping (Result<[Photo], Error>) -> Void) {
-        guard let url = urlFactory.url(method: .search(dateRange: dateRange))
-            else { return resultHandler(.failure(NetworkError(errorDescription: "Invalid Date Range"))) }
-        
-        networkService.executeRequest(url: url) { [weak self] result in
-            guard let self = self
-                else { return resultHandler(.failure(NetworkError(errorDescription: nil))) }
-            
-            switch result {
-            case .success(let data):
-                guard let cleanedData = self.removeFlickrPadding(from: data)
-                    else { return resultHandler(.failure(NetworkError(errorDescription: "Invalid JSON"))) }
-                do {
-                    let parser = PhotoResponseParser(data: cleanedData)
-                    let photos = try parser.parsePhotos()
-                    resultHandler(.success(photos))
-                } catch {
-                    Log.error(error.localizedDescription)
-                    resultHandler(.failure(error))
-                }
-            case .failure(let error):
-                Log.error(error.localizedDescription)
-                resultHandler(.failure(error))
-            }
-        }
-        
-    }
-    
     private func parseData(_ data: Data) -> Single<[Photo]> {
         return .create(subscribe: { single -> Disposable in
             guard let cleanedData = self.removeFlickrPadding(from: data) else {
