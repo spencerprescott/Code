@@ -8,6 +8,8 @@
 
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
 final class DaysViewController: ViewController {
     private let PhotoCellReuseIdentifier = "PhotoCellReuseIdentifier"
@@ -54,8 +56,19 @@ final class DaysViewController: ViewController {
             .drive(navigationItem.rx.title)
             .disposed(by: disposeBag)
         
+        collectionView.rx.contentOffset
+            .flatMap(indexPathOfCell)
+            .map { $0?.item ?? 0 }
+            .bind(to: viewModel.input.currentIndex)
+            .disposed(by: disposeBag)
+        
         // Fire off that we've started on page one
         viewModel.input.currentIndex.onNext(0)
+    }
+    
+    private func indexPathOfCell(at point: CGPoint) -> Observable<IndexPath?> {
+        let indexPath = collectionView.indexPathForItem(at: point)
+        return .just(indexPath)
     }
 }
 
@@ -63,10 +76,4 @@ extension DaysViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return collectionView.bounds.size
     }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        guard let indexPath = collectionView.indexPathsForVisibleItems.first else { return }
-        viewModel.input.currentIndex.onNext(indexPath.item)
-    }
-    
 }
