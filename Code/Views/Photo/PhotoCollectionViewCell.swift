@@ -37,7 +37,6 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.backgroundColor = .white
-        contentContainerView.isHidden = true
         
         contentView.addSubview(imageView)
         imageView.snp.makeConstraints { make in
@@ -63,7 +62,6 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        contentContainerView.isHidden = true
         imageView.image = nil
         imageView.kf.cancelDownloadTask()
         disposeBag = DisposeBag()
@@ -75,7 +73,7 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
         photo
             .map { $0?.title }
             .asDriver(onErrorJustReturn: nil)
-            .drive(photoTitle)
+            .drive(titleLabel.rx.text)
             .disposed(by: disposeBag)
         
         photo
@@ -83,12 +81,5 @@ final class PhotoCollectionViewCell: UICollectionViewCell {
             .asDriver(onErrorJustReturn: nil)
             .drive(imageView.rx.url)
             .disposed(by: disposeBag)
-    }
-    
-    private var photoTitle: Binder<String?> {
-        return Binder(self) { view, title in
-            view.titleLabel.text = title
-            view.contentContainerView.isHidden = title == nil
-        }
     }
 }
