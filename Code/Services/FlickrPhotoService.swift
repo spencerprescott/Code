@@ -7,18 +7,33 @@
 //
 
 import Foundation
+import RxSwift
 
 struct DateRange {
     let min: Date
     let max: Date
 }
 
-final class FlickrPhotoService {
+protocol FlickrPhotoServicing: class {
+    func searchPhotos(dateRange: DateRange) -> Single<[Photo]>
+}
+
+final class FlickrPhotoService: FlickrPhotoServicing {
     private let networkService: NetworkServicing
     private let urlFactory = FlickrUrlFactory(apiKey: "da736491e2087b749d0ffe25298a5f05")
     
     init(networkService: NetworkServicing = NetworkService()) {
         self.networkService = networkService
+    }
+    
+    func searchPhotos(dateRange: DateRange) -> Single<[Photo]> {
+        guard let url = urlFactory.url(method: .search(dateRange: dateRange)) else {
+            return .error(NetworkError(errorDescription: "Invalid Date Range"))
+        }
+
+        return networkService
+            .executeRequest(url: url)
+            .flatMap(parseData)
     }
     
     func searchPhotos(dateRange: DateRange, resultHandler: @escaping (Result<[Photo], Error>) -> Void) {
@@ -47,6 +62,26 @@ final class FlickrPhotoService {
             }
         }
         
+    }
+    
+    private func parseData(_ data: Data) -> Single<[Photo]> {
+        return .create(subscribe: { single -> Disposable in
+            guard let cleanedData = self.removeFlickrPadding(from: data) else {
+                single(.error(NetworkError(errorDescription: "Invalid JSON")))
+                return Disposables.create()
+            }
+            
+            do {
+                let parser = PhotoResponseParser(data: cleanedData)
+                let photos = try parser.parsePhotos()
+                single(.success(photos))
+            } catch {
+                Log.error(error.localizedDescription)
+                single(.error(error))
+            }
+            
+            return Disposables.create()
+        })
     }
     
     /// Helper to remove outdated padding technique Flickr does to all their JSON response :(
