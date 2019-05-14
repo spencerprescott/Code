@@ -17,10 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         window = UIWindow(frame: UIScreen.main.bounds)
-        let min = Date().addingDays(-7)
-        let max = Date()
-        let viewModel = PhotoViewModel(dateRange: DateRange(min: min, max: max))
-        window?.rootViewController = PhotoViewController(viewModel: viewModel)
+        let viewModel = DaysViewModel()
+        let viewController = DaysViewController(viewModel: viewModel)
+        window?.rootViewController = UINavigationController(rootViewController: viewController)
         window?.makeKeyAndVisible()
         return true
     }

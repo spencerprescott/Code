@@ -1,5 +1,5 @@
 //
-//  PhotoViewController.swift
+//  PhotoCollectionViewCell.swift
 //  Code
 //
 //  Created by Spencer Prescott on 5/13/19.
@@ -9,8 +9,10 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import RxSwift
+import RxCocoa
 
-final class PhotoViewController: ViewController {
+final class PhotoCollectionViewCell: UICollectionViewCell {
     private lazy var imageView: UIImageView = {
         let v = UIImageView()
         v.contentMode = .scaleAspectFill
@@ -24,37 +26,36 @@ final class PhotoViewController: ViewController {
         return l
     }()
     
-    private let service = FlickrPhotoService()
+    private var disposeBag = DisposeBag()
     
-    private let viewModel: PhotoViewModelType
-    
-    init(viewModel: PhotoViewModelType) {
-        self.viewModel = viewModel
-        super.init()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        contentView.backgroundColor = .white
+        
+        contentView.addSubview(imageView)
+        imageView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        contentView.addSubview(titleLabel)
+        titleLabel.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().offset(20)
+            make.leading.trailing.equalToSuperview()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .white
-
-        view.addSubview(imageView)
-        imageView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        view.addSubview(titleLabel)
-        titleLabel.snp.makeConstraints { make in
-            make.bottom.equalTo(view.snp.bottomMargin).offset(20)
-            make.leading.trailing.equalToSuperview()
-        }
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView.image = nil
+        imageView.kf.cancelDownloadTask()
+        disposeBag = DisposeBag()
     }
     
-    override func setupBindings() {
-        super.setupBindings()        
+    func update(viewModel: PhotoViewModelType) {
         let photo = viewModel.output.photo.share()
         
         photo
